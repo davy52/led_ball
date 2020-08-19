@@ -1,4 +1,15 @@
+
+
 #include <Wire.h>
+
+/* choose desired range by changing var range to coresponding number:
+  0 - ,
+  1 - ,
+  2 - ,
+  3 - 
+*/
+short int range = 0; 
+
 
 const int MPU_ADDR = 0x68;
 
@@ -18,7 +29,8 @@ float* gyro_y_error = &(errors[4]);
 float* gyro_z_error = &(errors[5]);
 
 
-char buff[85]; 
+
+
 
 
 void setup() {
@@ -26,8 +38,18 @@ void setup() {
   Wire.begin();
   Wire.beginTransmission(MPU_ADDR);
   Wire.write(0x6B);
-  Wire.write(B10001000); //mpu reset, disable temp_read
+  Wire.write(B10000000); //mpu reset
   Wire.endTransmission(true);
+  delay(20);
+  Wire.beginTransmission(MPU_ADDR);
+  Wire.write(0x6B);
+  Wire.write(B00001000); //disable temp_sens
+  Wire.endTransmission(true);
+
+  // ranges:
+  Wire.beginTransmission(MPU_ADDR);
+  Wire.write(0x00);
+  
 
   calculate_sensor_errors(errors);
   delay(20);
@@ -52,13 +74,18 @@ void loop() {
   Wire.endTransmission(false);
   Wire.requestFrom(MPU_ADDR, 6, true);
 
-  gyro_x = (Wire.read() << 8 | Wire>read()) / 131.0; //131.0 from datasheet for default range
-  gyro_y = (Wire.read() << 8 | Wire>read()) / 131.0;
-  gyro_z = (Wire.read() << 8 | Wire>read()) / 131.0;
+  gyro_x = (Wire.read() << 8 | Wire.read()) / 131.0; //131.0 from datasheet for default range
+  gyro_y = (Wire.read() << 8 | Wire.read()) / 131.0;
+  gyro_z = (Wire.read() << 8 | Wire.read()) / 131.0;
 
 }
 
 
-void calculate_sensor_errors(float* arr){ // calculating sensor errors for calibration
+void calculate_sensor_errors(float* errors){ 
+  /*
+    calculating sensor errors for calibration
+    errors = {acc_x_error, acc_y_error, acc_z_error, gyro_x_error, gyro_y_error, gyro_z_error} - floats
+  */
+
 
 }
