@@ -2,13 +2,18 @@
 
 #include <Wire.h>
 
+#define gyro_range = 2; // while "testing" found out that 1000*//s is about max for normal handling 
+#define acc_range = 0;
 /* choose desired range by changing var range to coresponding number:
-  0 - ,
-  1 - ,
-  2 - ,
-  3 - 
+  0 - gyro 250*\/s accel 2g
+  1 - gyro 500*\/s accel 4g
+  2 - gyro 1000*\/s accel 8g
+  3 - gyro 2000*\/s accel 16g
 */
-short int range = 0; 
+
+//                                                                      is it possible to define arrays?
+float gyro_sens[4] = {16384, 8192, 4096, 2048};
+float acc_sens[4] = {131, 65.5, 32.8, 16.4};
 
 
 const int MPU_ADDR = 0x68;
@@ -32,7 +37,6 @@ float* gyro_z_error = &(errors[5]);
 
 
 
-
 void setup() {
   Serial.begin(19200);
   Wire.begin();
@@ -48,7 +52,12 @@ void setup() {
 
   // ranges:
   Wire.beginTransmission(MPU_ADDR);
-  Wire.write(0x00);
+  Wire.write(0x1B);
+  Wire.write(0x00 | (gyro_range << 3));
+  Wire.endTransmission(false);
+  Wire.write(0x1C);
+  Wire.write(0x00 | (acc_range << 3));
+  Wire.endTransmission(true);
   
 
   calculate_sensor_errors(errors);
@@ -64,20 +73,21 @@ void loop() {
   Wire.endTransmission(false);
   Wire.requestFrom(MPU_ADDR, 6, true); //acc - x,y,z
   
-  acc_x = (Wire.read() << 8 | Wire.read()) / 16384.0; //16380.0 from datasheet works only on default ranges
-  acc_y = (Wire.read() << 8 | Wire.read()) / 16384.0;
-  acc_z = (Wire.read() << 8 | Wire.read()) / 16384.0;
+  acc_x = (Wire.read() << 8 | Wire.read()) / gyro_sens[range]; 
+  acc_y = (Wire.read() << 8 | Wire.read()) / gyro_sens[range];
+  acc_z = (Wire.read() << 8 | Wire.read()) / gyro_sens[range];
 
+  //reading accel values - not used now
+  // Wire.beginTransmission(MPU_ADDR);
+  // Wire.write(0x43);
+  // Wire.endTransmission(false);
+  // Wire.requestFrom(MPU_ADDR, 6, true);
 
-  Wire.beginTransmission(MPU_ADDR);
-  Wire.write(0x43);
-  Wire.endTransmission(false);
-  Wire.requestFrom(MPU_ADDR, 6, true);
+  // gyro_x = (Wire.read() << 8 | Wire.read()) / acc_sens[range];
+  // gyro_y = (Wire.read() << 8 | Wire.read()) / acc_sens[range];
+  // gyro_z = (Wire.read() << 8 | Wire.read()) / acc_sens[range];
 
-  gyro_x = (Wire.read() << 8 | Wire.read()) / 131.0; //131.0 from datasheet for default range
-  gyro_y = (Wire.read() << 8 | Wire.read()) / 131.0;
-  gyro_z = (Wire.read() << 8 | Wire.read()) / 131.0;
-
+  Serial.println(gyro_x);
 }
 
 
