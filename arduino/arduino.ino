@@ -42,7 +42,7 @@ void setup() {
   Wire.begin();
   Wire.beginTransmission(MPU_ADDR);
   Wire.write(0x6B);
-  Wire.write(B10000000); //mpu reset
+  Wire.write(0b10000000); //mpu reset
   Wire.endTransmission(true);
   delay(20);
   Wire.beginTransmission(MPU_ADDR);
