@@ -1,6 +1,7 @@
-
-
+#include <BasicLinearAlgebra.h>
 #include <Wire.h>
+#include <math.h>
+
 
 #define gyro_range  2 // while "testing" found out that 1000*//s is about max for normal handling 
 #define acc_range  0
